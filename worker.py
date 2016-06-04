@@ -153,8 +153,10 @@ def post_sdb_started(job_submitted, file_name):
 
 
 def do_some_work(message_body):
-    message_body = {}
     if  message_body is not None:
+        print (message_body)
+        message_body = json.loads(message_body.replace("'", "\""))
+
         print("Job file:      "+message_body.get('job_file'))
         print("Job id:        "+message_body.get('job_id'))
         database = get_sdb(message_body.get('job_id'))
@@ -182,11 +184,12 @@ def do_some_work(message_body):
 botoConfig = Config(connect_timeout=50, read_timeout=70)
 swf = boto3.client('swf', config=botoConfig)
 
-DOMAIN = "MyTestSWF"
-WORKFLOW = "MyTypeWF"
+DOMAIN = "MyFinalSWF"
+WORKFLOW = "MyFinalSWF2"
 TASKNAME = "proof_of_work"
 VERSION = "1"
-TASKLIST = "MyTaskList"
+TASKLIST = "MyFinalTaskList2"
+WORKER = str(int(round(time.time() * 1000)))
 
 
 while True:
@@ -194,7 +197,7 @@ while True:
         task = swf.poll_for_activity_task(
                                           domain=DOMAIN,
                                           taskList={'name': TASKLIST},
-                                          identity='worker-1')
+                                          identity= WORKER)
         if 'taskToken' not in task:
             print("Poll timed out, no new task.  Repoll")
         else:
